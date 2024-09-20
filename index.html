@@ -76,8 +76,10 @@
             height: 300px;
             position: relative;
             overflow: hidden;
-            background: #eaeaea;
+            background: #f9f9f9;
             margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         .graphic svg {
             width: 100%;
@@ -130,6 +132,30 @@
                 transform: translate(300px, 200px);
             }
         }
+        /* Hand-Drawn Effect */
+        .hand-drawn {
+            stroke: #000;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+        .train-body {
+            fill: #f5a623;
+            stroke: #000;
+            stroke-width: 2;
+        }
+        .worker {
+            fill: #7ed321;
+            stroke: #000;
+            stroke-width: 2;
+        }
+        .lever {
+            fill: #d0021b;
+            stroke: #000;
+            stroke-width: 2;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -148,33 +174,20 @@
         const scenarios = [
             {
                 id: 1,
-                title: "Scenario 1: The Runaway Train",
-                description: "A train is hurtling down a track towards a group of five workers who cannot hear it coming. You are next to a lever that can switch the train to another track where it will hit one worker instead.",
+                title: "Scenario 1: The Runaway Trolley",
+                description: "A trolley is hurtling down a track towards a group of five workers who cannot hear it coming. You are next to a lever that can switch the trolley to another track where it will hit one worker instead.",
                 options: [
-                    { text: "Option A: Do nothing, and the train kills the five workers.", stats: { A: 0, B: 0 } },
-                    { text: "Option B: Pull the lever, diverting the train to kill one worker.", stats: { A: 0, B: 0 } }
+                    { text: "Option A: Do nothing, and the trolley kills the five workers.", stats: { A: 0, B: 0 } },
+                    { text: "Option B: Pull the lever, diverting the trolley to kill one worker.", stats: { A: 0, B: 0 } }
                 ],
                 graphic: function(selectedOption) {
                     return `
                         <!-- SVG Graphic -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300">
-                            <!-- Styles -->
-                            <style>
-                                .track { stroke: #888; stroke-width: 4; stroke-linecap: round; }
-                                .worker { fill: #00aaff; }
-                                .train { fill: #ff5555; }
-                                .lever { fill: #cccccc; cursor: pointer; }
-                                .speech-bubble {
-                                    font-family: Arial, sans-serif;
-                                    font-size: 14px;
-                                    fill: #000;
-                                }
-                            </style>
-                            <!-- Tracks -->
-                            <line x1="100" y1="50" x2="700" y2="50" class="track"/>
-                            <line x1="100" y1="250" x2="700" y2="250" class="track"/>
-                            <!-- Diverging Track -->
-                            <line x1="400" y1="50" x2="700" y2="250" class="track"/>
+                            <!-- Hand-Drawn Tracks -->
+                            <path d="M100,50 L700,50" class="hand-drawn"/>
+                            <path d="M100,250 L700,250" class="hand-drawn"/>
+                            <path d="M400,50 L700,250" class="hand-drawn"/>
                             <!-- Workers -->
                             <g id="workers">
                                 <circle cx="650" cy="50" r="15" class="worker"/>
@@ -187,12 +200,21 @@
                             <g id="single-worker">
                                 <circle cx="730" cy="250" r="15" class="worker"/>
                             </g>
-                            <!-- Train -->
-                            <rect x="350" y="20" width="50" height="30" class="train" id="train"/>
+                            <!-- Trolley -->
+                            <g id="trolley" transform="translate(350,20)">
+                                <!-- Trolley Body -->
+                                <rect width="50" height="30" class="train-body"/>
+                                <!-- Wheels -->
+                                <circle cx="10" cy="35" r="5" class="hand-drawn"/>
+                                <circle cx="40" cy="35" r="5" class="hand-drawn"/>
+                                <!-- Pantograph -->
+                                <line x1="25" y1="0" x2="25" y2="-15" class="hand-drawn"/>
+                                <polyline points="20,-15 25,-20 30,-15" class="hand-drawn"/>
+                            </g>
                             <!-- Lever -->
                             <g id="lever" onclick="selectOption(1)">
-                                <circle cx="100" cy="150" r="20" class="lever"/>
-                                <line x1="100" y1="150" x2="${selectedOption === 1 ? '140' : '100'}" y2="${selectedOption === 1 ? '110' : '100'}" stroke="#000" stroke-width="4"/>
+                                <line x1="100" y1="150" x2="${selectedOption === 1 ? '130' : '100'}" y2="${selectedOption === 1 ? '120' : '100'}" class="lever"/>
+                                <circle cx="100" cy="150" r="10" class="lever"/>
                             </g>
                         </svg>
                     `;
@@ -201,19 +223,19 @@
                     const svgElement = document.querySelector('.graphic svg');
                     if (!svgElement) return;
                     if (selectedOption === 0) {
-                        // Option A: Train continues straight
-                        const train = svgElement.getElementById('train');
+                        // Option A: Trolley continues straight
+                        const trolley = svgElement.getElementById('trolley');
                         const workers = svgElement.getElementById('workers');
-                        train.classList.add('move-train');
+                        trolley.classList.add('move-train');
                         setTimeout(() => {
                             workers.classList.add('fade-out');
                             showSpeechBubble('Aaargh!', 650, 30);
                         }, 2000);
                     } else {
-                        // Option B: Train diverts to single worker
-                        const train = svgElement.getElementById('train');
+                        // Option B: Trolley diverts to single worker
+                        const trolley = svgElement.getElementById('trolley');
                         const singleWorker = svgElement.getElementById('single-worker');
-                        train.classList.add('move-train-divert');
+                        trolley.classList.add('move-train-divert');
                         setTimeout(() => {
                             singleWorker.classList.add('fade-out');
                             showSpeechBubble('Why me?!', 730, 230);
