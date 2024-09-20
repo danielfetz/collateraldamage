@@ -15,7 +15,6 @@
             width: 90%;
             max-width: 800px;
             margin: 50px auto;
-            overflow: hidden;
             padding: 20px;
             background: #fff;
             border-radius: 10px;
@@ -62,9 +61,6 @@
             font-size: 14px;
             color: #555;
         }
-        .hidden {
-            display: none;
-        }
         .footer {
             text-align: center;
             padding: 10px;
@@ -78,63 +74,61 @@
         .graphic {
             width: 100%;
             height: 300px;
-            background: #eaeaea;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-top: 20px;
             position: relative;
             overflow: hidden;
+            background: #eaeaea;
+            margin-top: 20px;
         }
         .graphic svg {
             width: 100%;
             height: 100%;
         }
-        .graphic .interactive {
-            cursor: pointer;
+        .speech-bubble {
+            position: absolute;
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            display: none;
+            z-index: 10;
         }
-        .graphic text {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            margin-left: -10px;
+            border-width: 10px;
+            border-style: solid;
+            border-color: #000 transparent transparent transparent;
         }
-        /* Animation Styles */
+        .hidden {
+            display: none;
+        }
         .fade-out {
             animation: fadeOut 1s forwards;
         }
         @keyframes fadeOut {
             to {
                 opacity: 0;
-                transform: translateY(-20px);
             }
         }
-        .explosion {
-            animation: explode 0.5s steps(5) forwards;
-            background-image: url('https://i.pinimg.com/736x/fc/78/11/fc7811ff756e44cee7234bfc412bca4e.jpg'); /* You need to provide an explosion sprite image */
-            background-size: cover;
+        .move-train {
+            animation: moveTrain 2s forwards;
         }
-        @keyframes explode {
+        @keyframes moveTrain {
             to {
-                opacity: 0;
-                transform: scale(2);
+                transform: translateX(300px);
             }
         }
-        /* Speech Bubble */
-        .speech-bubble {
-            position: absolute;
-            background: #fff;
-            border: 2px solid #000;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 16px;
-            display: none;
+        .move-train-divert {
+            animation: moveTrainDivert 2s forwards;
         }
-        .speech-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            margin-left: -10px;
-            border-width: 10px;
-            border-style: solid;
-            border-color: #000 transparent transparent transparent;
+        @keyframes moveTrainDivert {
+            to {
+                transform: translate(300px, 200px);
+            }
         }
     </style>
 </head>
@@ -162,190 +156,76 @@
                 ],
                 graphic: function(selectedOption) {
                     return `
-                        <svg viewBox="0 0 800 300">
+                        <!-- SVG Graphic -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300">
+                            <!-- Styles -->
+                            <style>
+                                .track { stroke: #888; stroke-width: 4; stroke-linecap: round; }
+                                .worker { fill: #00aaff; }
+                                .train { fill: #ff5555; }
+                                .lever { fill: #cccccc; cursor: pointer; }
+                                .speech-bubble {
+                                    font-family: Arial, sans-serif;
+                                    font-size: 14px;
+                                    fill: #000;
+                                }
+                            </style>
                             <!-- Tracks -->
-                            <line x1="100" y1="50" x2="700" y2="50" stroke="#888" stroke-width="4"/>
-                            <line x1="100" y1="250" x2="700" y2="250" stroke="#888" stroke-width="4"/>
+                            <line x1="100" y1="50" x2="700" y2="50" class="track"/>
+                            <line x1="100" y1="250" x2="700" y2="250" class="track"/>
                             <!-- Diverging Track -->
-                            <line x1="400" y1="50" x2="700" y2="250" stroke="#888" stroke-width="4"/>
+                            <line x1="400" y1="50" x2="700" y2="250" class="track"/>
                             <!-- Workers -->
                             <g id="workers">
-                                <circle cx="650" cy="50" r="15" fill="blue"/>
-                                <circle cx="670" cy="50" r="15" fill="blue"/>
-                                <circle cx="690" cy="50" r="15" fill="blue"/>
-                                <circle cx="710" cy="50" r="15" fill="blue"/>
-                                <circle cx="730" cy="50" r="15" fill="blue"/>
+                                <circle cx="650" cy="50" r="15" class="worker"/>
+                                <circle cx="670" cy="50" r="15" class="worker"/>
+                                <circle cx="690" cy="50" r="15" class="worker"/>
+                                <circle cx="710" cy="50" r="15" class="worker"/>
+                                <circle cx="730" cy="50" r="15" class="worker"/>
                             </g>
-                            <text x="650" y="30" font-size="14">5 Workers</text>
-                            <g id="worker">
-                                <circle cx="730" cy="250" r="15" fill="green"/>
+                            <!-- Single Worker -->
+                            <g id="single-worker">
+                                <circle cx="730" cy="250" r="15" class="worker"/>
                             </g>
-                            <text x="730" y="280" font-size="14" text-anchor="middle">1 Worker</text>
                             <!-- Train -->
-                            ${selectedOption === 1 ? `
-                                <!-- Train diverted -->
-                                <rect x="350" y="200" width="50" height="30" fill="red" id="train"/>
-                                <animate xlink:href="#train" attributeName="x" from="350" to="680" dur="2s" fill="freeze"/>
-                                <animate xlink:href="#train" attributeName="y" from="200" to="220" dur="2s" fill="freeze"/>
-                            ` : `
-                                <!-- Train continues straight -->
-                                <rect x="350" y="20" width="50" height="30" fill="red" id="train"/>
-                                <animate xlink:href="#train" attributeName="x" from="350" to="680" dur="2s" fill="freeze"/>
-                            `}
+                            <rect x="350" y="20" width="50" height="30" class="train" id="train"/>
                             <!-- Lever -->
-                            <circle cx="100" cy="150" r="20" fill="#ccc" class="interactive" onclick="selectOption(1)"/>
-                            <line x1="100" y1="150" x2="${selectedOption === 1 ? '140' : '100'}" y2="${selectedOption === 1 ? '110' : '100'}" stroke="black" stroke-width="4"/>
-                            <text x="70" y="160" font-size="14">Lever</text>
-                        </svg>
-                    `;
-                },
-                animation: function(selectedOption) {
-                    if (selectedOption === 0) {
-                        // Option A: Train kills five workers
-                        document.getElementById('workers').classList.add('fade-out');
-                        showSpeechBubble(690, 20, 'Aaargh!');
-                    } else {
-                        // Option B: Train kills one worker
-                        document.getElementById('worker').classList.add('fade-out');
-                        showSpeechBubble(730, 230, 'Why me?!');
-                    }
-                }
-            },
-            {
-                id: 2,
-                title: "Scenario 2: The Hospital Organ Shortage",
-                description: "Five patients need organ transplants to survive. A healthy traveler comes in for a routine check-up.",
-                options: [
-                    { text: "Option A: Do nothing, and the five patients die.", stats: { A: 0, B: 0 } },
-                    { text: "Option B: Sacrifice the traveler to save the five patients.", stats: { A: 0, B: 0 } }
-                ],
-                graphic: function(selectedOption) {
-                    return `
-                        <svg viewBox="0 0 800 300">
-                            <!-- Hospital Building -->
-                            <rect x="50" y="50" width="700" height="200" fill="#eaeaea" stroke="#ccc"/>
-                            <!-- Patients -->
-                            <g id="patients">
-                                <circle cx="200" cy="150" r="20" fill="blue"/>
-                                <circle cx="300" cy="150" r="20" fill="blue"/>
-                                <circle cx="400" cy="150" r="20" fill="blue"/>
-                                <circle cx="500" cy="150" r="20" fill="blue"/>
-                                <circle cx="600" cy="150" r="20" fill="blue"/>
+                            <g id="lever" onclick="selectOption(1)">
+                                <circle cx="100" cy="150" r="20" class="lever"/>
+                                <line x1="100" y1="150" x2="${selectedOption === 1 ? '140' : '100'}" y2="${selectedOption === 1 ? '110' : '100'}" stroke="#000" stroke-width="4"/>
                             </g>
-                            <text x="400" y="100" font-size="16" text-anchor="middle">5 Patients</text>
-                            <!-- Traveler -->
-                            <g id="traveler">
-                                <circle cx="700" cy="250" r="20" fill="green"/>
-                            </g>
-                            <text x="700" y="280" font-size="14" text-anchor="middle">Traveler</text>
-                            ${selectedOption === 1 ? `
-                                <!-- Traveler sacrificed -->
-                                <line x1="700" y1="250" x2="700" y2="150" stroke="black" stroke-width="2"/>
-                                <animate xlink:href="#traveler" attributeName="opacity" from="1" to="0" dur="1s" fill="freeze"/>
-                            ` : `
-                                <!-- No action -->
-                            `}
                         </svg>
                     `;
                 },
                 animation: function(selectedOption) {
-                    if (selectedOption === 1) {
-                        // Option B: Sacrifice traveler
-                        document.getElementById('traveler').classList.add('fade-out');
-                        showSpeechBubble(700, 230, 'Wait, what?!');
-                    } else {
-                        // Option A: Patients die
-                        document.getElementById('patients').classList.add('fade-out');
-                        showSpeechBubble(400, 130, 'Goodbye...');
-                    }
-                }
-            },
-            {
-                id: 3,
-                title: "Scenario 3: The Bomb Threat",
-                description: "A terrorist has planted a bomb in a crowded city area. You have captured him but he refuses to disclose the location.",
-                options: [
-                    { text: "Option A: Respect his rights and hope to find the bomb in time.", stats: { A: 0, B: 0 } },
-                    { text: "Option B: Use harsh interrogation techniques to extract information, violating his rights.", stats: { A: 0, B: 0 } }
-                ],
-                graphic: function(selectedOption) {
-                    return `
-                        <svg viewBox="0 0 800 300">
-                            <!-- Cityscape -->
-                            <rect x="0" y="150" width="800" height="150" fill="#ccc"/>
-                            <!-- Bomb -->
-                            <g id="bomb">
-                                <circle cx="400" cy="200" r="20" fill="red"/>
-                                <text x="400" y="195" font-size="14" text-anchor="middle" fill="#fff">Bomb</text>
-                            </g>
-                            <!-- Terrorist -->
-                            <circle cx="100" cy="250" r="20" fill="black"/>
-                            <text x="100" y="280" font-size="14" text-anchor="middle">Suspect</text>
-                            ${selectedOption === 1 ? `
-                                <!-- Interrogation -->
-                                <line x1="100" y1="250" x2="400" y2="200" stroke="black" stroke-width="2"/>
-                                <animate xlink:href="#bomb" attributeName="opacity" from="1" to="0" dur="1s" fill="freeze"/>
-                            ` : `
-                                <!-- No action -->
-                            `}
-                        </svg>
-                    `;
-                },
-                animation: function(selectedOption) {
+                    const svgElement = document.querySelector('.graphic svg');
+                    if (!svgElement) return;
                     if (selectedOption === 0) {
-                        // Option A: Bomb explodes
-                        document.getElementById('bomb').classList.add('explosion');
+                        // Option A: Train continues straight
+                        const train = svgElement.getElementById('train');
+                        const workers = svgElement.getElementById('workers');
+                        train.classList.add('move-train');
+                        setTimeout(() => {
+                            workers.classList.add('fade-out');
+                            showSpeechBubble('Aaargh!', 650, 30);
+                        }, 2000);
                     } else {
-                        // Option B: Bomb defused
-                        showSpeechBubble(400, 180, 'Bomb Defused!');
+                        // Option B: Train diverts to single worker
+                        const train = svgElement.getElementById('train');
+                        const singleWorker = svgElement.getElementById('single-worker');
+                        train.classList.add('move-train-divert');
+                        setTimeout(() => {
+                            singleWorker.classList.add('fade-out');
+                            showSpeechBubble('Why me?!', 730, 230);
+                        }, 2000);
                     }
                 }
             },
-            {
-                id: 4,
-                title: "Scenario 4: The Drone Strike",
-                description: "You have intel on a terrorist leader's location. A drone strike will eliminate the threat but also cause collateral damage, killing nearby civilians.",
-                options: [
-                    { text: "Option A: Authorize the strike to eliminate the terrorist.", stats: { A: 0, B: 0 } },
-                    { text: "Option B: Abort the mission to avoid civilian casualties.", stats: { A: 0, B: 0 } }
-                ],
-                graphic: function(selectedOption) {
-                    return `
-                        <svg viewBox="0 0 800 300">
-                            <!-- Buildings -->
-                            <rect x="350" y="100" width="100" height="150" fill="#aaa" id="building"/>
-                            <text x="400" y="90" font-size="14" text-anchor="middle">Target Building</text>
-                            <!-- Drone -->
-                            <polygon points="100,50 120,70 80,70" fill="#666" id="drone"/>
-                            ${selectedOption === 0 ? `
-                                <!-- Drone Strike -->
-                                <animateMotion xlink:href="#drone" dur="2s" fill="freeze">
-                                    <mpath xlink:href="#dronePath"/>
-                                </animateMotion>
-                                <path id="dronePath" d="M100,50 L400,150"/>
-                                <animate xlink:href="#building" attributeName="opacity" from="1" to="0" begin="2s" dur="0.5s" fill="freeze"/>
-                            ` : `
-                                <!-- No action -->
-                            `}
-                        </svg>
-                    `;
-                },
-                animation: function(selectedOption) {
-                    if (selectedOption === 0) {
-                        // Option A: Building destroyed
-                        document.getElementById('building').classList.add('fade-out');
-                        showSpeechBubble(400, 80, 'Boom!');
-                    } else {
-                        // Option B: Mission aborted
-                        showSpeechBubble(100, 30, 'Mission Aborted');
-                    }
-                }
-            },
-            // Add more scenarios as needed...
+            // Additional scenarios...
         ];
 
         let currentScenario = 0;
-        let gameContainer = document.getElementById('game');
+        const gameContainer = document.getElementById('game');
 
         function loadScenario(index) {
             if (index >= scenarios.length) {
@@ -359,7 +239,7 @@
                 <div class="scenario">
                     <h2>${scenario.title}</h2>
                     <p>${scenario.description}</p>
-                    <div class="graphic" id="graphic">
+                    <div class="graphic">
                         ${scenario.graphic(null)}
                     </div>
                     <div class="options">
@@ -378,12 +258,12 @@
             // Update stats (in a real application, you would send this to a server)
             selectedOption.stats[optionIndex === 0 ? 'A' : 'B'] += 1;
 
-            // Display result with updated graphic
+            // Display result
             gameContainer.innerHTML = `
                 <div class="scenario">
                     <h2>${scenario.title}</h2>
                     <p>You chose: <strong>${selectedOption.text}</strong></p>
-                    <div class="graphic" id="graphic">
+                    <div class="graphic">
                         ${scenario.graphic(optionIndex)}
                     </div>
                     <div class="result">
@@ -398,7 +278,9 @@
             `;
 
             // Run animation
-            scenario.animation(optionIndex);
+            setTimeout(() => {
+                scenario.animation(optionIndex);
+            }, 500);
         }
 
         function nextScenario() {
@@ -406,13 +288,13 @@
             loadScenario(currentScenario);
         }
 
-        function showSpeechBubble(x, y, text) {
+        function showSpeechBubble(text, x, y) {
             const bubble = document.createElement('div');
             bubble.className = 'speech-bubble';
             bubble.style.left = `${x}px`;
             bubble.style.top = `${y}px`;
             bubble.innerText = text;
-            document.getElementById('graphic').appendChild(bubble);
+            document.querySelector('.graphic').appendChild(bubble);
             bubble.style.display = 'block';
         }
 
