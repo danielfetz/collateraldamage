@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Collateral Dilemma</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            overflow: hidden;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+        }
+        .scenario {
+            margin-bottom: 20px;
+        }
+        .scenario h2 {
+            margin-top: 0;
+        }
+        .options {
+            margin-top: 20px;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .option-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .progress {
+            text-align: right;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .stats {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .hidden {
+            display: none;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            background: #222;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .graphic {
+            width: 100%;
+            height: 300px;
+            background: #eaeaea;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 20px;
+            position: relative;
+        }
+        .graphic svg {
+            width: 100%;
+            height: 100%;
+        }
+        .graphic .interactive {
+            cursor: pointer;
+        }
+        .graphic text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="game">
+            <!-- Game content will be injected here -->
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2024 Collateral Dilemma
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                id: 1,
+                title: "Scenario 1: The Runaway Train",
+                description: "A train is hurtling down a track towards a group of five workers who cannot hear it coming. You are next to a lever that can switch the train to another track where it will hit one worker instead.",
+                options: [
+                    { text: "Option A: Do nothing, and the train kills the five workers.", stats: { A: 0, B: 0 } },
+                    { text: "Option B: Pull the lever, diverting the train to kill one worker.", stats: { A: 0, B: 0 } }
+                ],
+                graphic: function(selectedOption) {
+                    return `
+                        <svg viewBox="0 0 800 300">
+                            <!-- Tracks -->
+                            <line x1="100" y1="50" x2="700" y2="50" stroke="#888" stroke-width="4"/>
+                            <line x1="100" y1="250" x2="700" y2="250" stroke="#888" stroke-width="4"/>
+                            <!-- Diverging Track -->
+                            <line x1="400" y1="50" x2="700" y2="250" stroke="#888" stroke-width="4"/>
+                            <!-- Workers -->
+                            <circle cx="650" cy="50" r="15" fill="blue"/>
+                            <circle cx="670" cy="50" r="15" fill="blue"/>
+                            <circle cx="690" cy="50" r="15" fill="blue"/>
+                            <circle cx="710" cy="50" r="15" fill="blue"/>
+                            <circle cx="730" cy="50" r="15" fill="blue"/>
+                            <text x="650" y="30" font-size="14">5 Workers</text>
+                            <circle cx="730" cy="250" r="15" fill="green"/>
+                            <text x="730" y="280" font-size="14" text-anchor="middle">1 Worker</text>
+                            <!-- Train -->
+                            ${selectedOption === 1 ? `
+                                <!-- Train diverted -->
+                                <rect x="350" y="200" width="50" height="30" fill="red"/>
+                                <line x1="375" y1="200" x2="375" y2="190" stroke="black" stroke-width="2"/>
+                                <polygon points="375,190 370,200 380,200" fill="black"/>
+                            ` : `
+                                <!-- Train continues straight -->
+                                <rect x="350" y="20" width="50" height="30" fill="red"/>
+                                <line x1="375" y1="20" x2="375" y2="10" stroke="black" stroke-width="2"/>
+                                <polygon points="375,10 370,20 380,20" fill="black"/>
+                            `}
+                            <!-- Lever -->
+                            <circle cx="100" cy="150" r="20" fill="#ccc" class="interactive" onclick="selectOption(1)"/>
+                            <line x1="100" y1="150" x2="${selectedOption === 1 ? '140' : '100'}" y2="${selectedOption === 1 ? '110' : '100'}" stroke="black" stroke-width="4"/>
+                            <text x="70" y="160" font-size="14">Lever</text>
+                        </svg>
+                    `;
+                }
+            },
+            {
+                id: 2,
+                title: "Scenario 2: The Hospital Organ Shortage",
+                description: "Five patients need organ transplants to survive. A healthy traveler comes in for a routine check-up.",
+                options: [
+                    { text: "Option A: Do nothing, and the five patients die.", stats: { A: 0, B: 0 } },
+                    { text: "Option B: Sacrifice the traveler to save the five patients.", stats: { A: 0, B: 0 } }
+                ],
+                graphic: function(selectedOption) {
+                    return `
+                        <svg viewBox="0 0 800 300">
+                            <!-- Hospital Building -->
+                            <rect x="50" y="50" width="700" height="200" fill="#eaeaea" stroke="#ccc"/>
+                            <!-- Patients -->
+                            <circle cx="200" cy="150" r="20" fill="blue"/>
+                            <circle cx="300" cy="150" r="20" fill="blue"/>
+                            <circle cx="400" cy="150" r="20" fill="blue"/>
+                            <circle cx="500" cy="150" r="20" fill="blue"/>
+                            <circle cx="600" cy="150" r="20" fill="blue"/>
+                            <text x="400" y="100" font-size="16" text-anchor="middle">5 Patients</text>
+                            <!-- Traveler -->
+                            <circle cx="700" cy="250" r="20" fill="green"/>
+                            <text x="700" y="280" font-size="14" text-anchor="middle">Traveler</text>
+                            ${selectedOption === 1 ? `
+                                <!-- No action -->
+                                <text x="400" y="50" font-size="20" text-anchor="middle" fill="red">Patients Not Saved</text>
+                            ` : `
+                                <!-- Traveler sacrificed -->
+                                <line x1="700" y1="250" x2="700" y2="150" stroke="black" stroke-width="2"/>
+                                <text x="400" y="50" font-size="20" text-anchor="middle" fill="green">Patients Saved</text>
+                            `}
+                        </svg>
+                    `;
+                }
+            },
+            // Additional scenarios with graphics...
+        ];
+
+        let currentScenario = 0;
+        let gameContainer = document.getElementById('game');
+
+        function loadScenario(index) {
+            if (index >= scenarios.length) {
+                gameContainer.innerHTML = "<h2>Thank you for playing Collateral Dilemma!</h2>";
+                return;
+            }
+
+            const scenario = scenarios[index];
+            gameContainer.innerHTML = `
+                <div class="progress">Scenario ${scenario.id} of ${scenarios.length}</div>
+                <div class="scenario">
+                    <h2>${scenario.title}</h2>
+                    <p>${scenario.description}</p>
+                    <div class="graphic">
+                        ${scenario.graphic(null)}
+                    </div>
+                    <div class="options">
+                        ${scenario.options.map((option, i) => `
+                            <button class="option-button" onclick="selectOption(${i})">${option.text}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectOption(optionIndex) {
+            const scenario = scenarios[currentScenario];
+            const selectedOption = scenario.options[optionIndex];
+
+            // Update stats (in a real application, you would send this to a server)
+            selectedOption.stats[optionIndex === 0 ? 'A' : 'B'] += 1;
+
+            // Display result with updated graphic
+            gameContainer.innerHTML = `
+                <div class="scenario">
+                    <h2>${scenario.title}</h2>
+                    <p>You chose: <strong>${selectedOption.text}</strong></p>
+                    <div class="graphic">
+                        ${scenario.graphic(optionIndex)}
+                    </div>
+                    <div class="result">
+                        <p>Thank you for your choice. Here's how others have responded:</p>
+                        <div class="stats">
+                            Option A: ${scenario.options[0].stats['A']} votes<br>
+                            Option B: ${scenario.options[1].stats['B']} votes
+                        </div>
+                    </div>
+                    <button class="option-button" onclick="nextScenario()">Next Scenario</button>
+                </div>
+            `;
+        }
+
+        function nextScenario() {
+            currentScenario++;
+            loadScenario(currentScenario);
+        }
+
+        // Start the game
+        loadScenario(currentScenario);
+    </script>
+</body>
+</html>
