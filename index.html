@@ -117,7 +117,7 @@
             }
         }
         .move-train {
-            animation: moveTrain 2s forwards;
+            animation: moveTrain 3s cubic-bezier(0.42, 0, 0.58, 1) forwards;
         }
         @keyframes moveTrain {
             to {
@@ -125,36 +125,12 @@
             }
         }
         .move-train-divert {
-            animation: moveTrainDivert 2s forwards;
+            animation: moveTrainDivert 3s cubic-bezier(0.42, 0, 0.58, 1) forwards;
         }
         @keyframes moveTrainDivert {
             to {
                 transform: translate(300px, 200px);
             }
-        }
-        /* Hand-Drawn Effect */
-        .hand-drawn {
-            stroke: #000;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-        }
-        .train-body {
-            fill: #f5a623;
-            stroke: #000;
-            stroke-width: 2;
-        }
-        .worker {
-            fill: #7ed321;
-            stroke: #000;
-            stroke-width: 2;
-        }
-        .lever {
-            fill: #d0021b;
-            stroke: #000;
-            stroke-width: 2;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -184,37 +160,47 @@
                     return `
                         <!-- SVG Graphic -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300">
+                            <!-- Filters -->
+                            <defs>
+                                <filter id="roughen">
+                                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="1" result="noise"/>
+                                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+                                </filter>
+                            </defs>
                             <!-- Hand-Drawn Tracks -->
-                            <path d="M100,50 L700,50" class="hand-drawn"/>
-                            <path d="M100,250 L700,250" class="hand-drawn"/>
-                            <path d="M400,50 L700,250" class="hand-drawn"/>
+                            <path d="M100,50 Q400,60 700,50" class="hand-drawn" filter="url(#roughen)"/>
+                            <path d="M100,250 Q400,240 700,250" class="hand-drawn" filter="url(#roughen)"/>
+                            <path d="M400,50 Q550,150 700,250" class="hand-drawn" filter="url(#roughen)"/>
                             <!-- Workers -->
                             <g id="workers">
-                                <circle cx="650" cy="50" r="15" class="worker"/>
-                                <circle cx="670" cy="50" r="15" class="worker"/>
-                                <circle cx="690" cy="50" r="15" class="worker"/>
-                                <circle cx="710" cy="50" r="15" class="worker"/>
-                                <circle cx="730" cy="50" r="15" class="worker"/>
+                                <circle cx="650" cy="50" r="15" class="worker" filter="url(#roughen)"/>
+                                <circle cx="670" cy="50" r="15" class="worker" filter="url(#roughen)"/>
+                                <circle cx="690" cy="50" r="15" class="worker" filter="url(#roughen)"/>
+                                <circle cx="710" cy="50" r="15" class="worker" filter="url(#roughen)"/>
+                                <circle cx="730" cy="50" r="15" class="worker" filter="url(#roughen)"/>
                             </g>
                             <!-- Single Worker -->
                             <g id="single-worker">
-                                <circle cx="730" cy="250" r="15" class="worker"/>
+                                <circle cx="730" cy="250" r="15" class="worker" filter="url(#roughen)"/>
                             </g>
                             <!-- Trolley -->
                             <g id="trolley" transform="translate(350,20)">
                                 <!-- Trolley Body -->
-                                <rect width="50" height="30" class="train-body"/>
+                                <path d="M0,0 L50,0 L50,30 L0,30 Z" class="train-body" filter="url(#roughen)"/>
+                                <!-- Windows -->
+                                <rect x="5" y="5" width="10" height="10" fill="#fff" stroke="#000" stroke-width="1" filter="url(#roughen)"/>
+                                <rect x="20" y="5" width="10" height="10" fill="#fff" stroke="#000" stroke-width="1" filter="url(#roughen)"/>
+                                <rect x="35" y="5" width="10" height="10" fill="#fff" stroke="#000" stroke-width="1" filter="url(#roughen)"/>
                                 <!-- Wheels -->
-                                <circle cx="10" cy="35" r="5" class="hand-drawn"/>
-                                <circle cx="40" cy="35" r="5" class="hand-drawn"/>
+                                <circle cx="15" cy="35" r="5" class="hand-drawn" fill="#000" filter="url(#roughen)"/>
+                                <circle cx="35" cy="35" r="5" class="hand-drawn" fill="#000" filter="url(#roughen)"/>
                                 <!-- Pantograph -->
-                                <line x1="25" y1="0" x2="25" y2="-15" class="hand-drawn"/>
-                                <polyline points="20,-15 25,-20 30,-15" class="hand-drawn"/>
+                                <path d="M25,0 L25,-10 L20,-15 M25,-10 L30,-15" class="hand-drawn" filter="url(#roughen)"/>
                             </g>
                             <!-- Lever -->
                             <g id="lever" onclick="selectOption(1)">
-                                <line x1="100" y1="150" x2="${selectedOption === 1 ? '130' : '100'}" y2="${selectedOption === 1 ? '120' : '100'}" class="lever"/>
-                                <circle cx="100" cy="150" r="10" class="lever"/>
+                                <line x1="100" y1="150" x2="${selectedOption === 1 ? '130' : '100'}" y2="${selectedOption === 1 ? '120' : '100'}" class="lever" filter="url(#roughen)"/>
+                                <circle cx="100" cy="150" r="10" class="lever" filter="url(#roughen)"/>
                             </g>
                         </svg>
                     `;
@@ -230,7 +216,7 @@
                         setTimeout(() => {
                             workers.classList.add('fade-out');
                             showSpeechBubble('Aaargh!', 650, 30);
-                        }, 2000);
+                        }, 3000);
                     } else {
                         // Option B: Trolley diverts to single worker
                         const trolley = svgElement.getElementById('trolley');
@@ -239,7 +225,7 @@
                         setTimeout(() => {
                             singleWorker.classList.add('fade-out');
                             showSpeechBubble('Why me?!', 730, 230);
-                        }, 2000);
+                        }, 3000);
                     }
                 }
             },
